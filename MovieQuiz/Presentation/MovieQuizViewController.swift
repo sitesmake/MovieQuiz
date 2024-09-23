@@ -1,10 +1,26 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController {
+    
+    // MARK: - IB Outlets
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var textLabel: UILabel!
     @IBOutlet private var counterLabel: UILabel!
     
+    // MARK: - Private Properties
+    private var currentQuestionIndex: Int = .zero
+    private var correctAnswers: Int = .zero
+    
+    // MARK: - View Life Cycles
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        let currentQuestion = questions[currentQuestionIndex]
+        let viewModel = convert(model: currentQuestion)
+        show(quiz: viewModel)
+    }
+    
+    // MARK: - IB Actions
     @IBAction private func noButtonClicked(_ sender: UIButton) {
         let currentQuestion = questions[currentQuestionIndex]
         let givenAnswer = false
@@ -19,11 +35,8 @@ final class MovieQuizViewController: UIViewController {
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
     
-    private var currentQuestionIndex = 0
-    private var correctAnswers = 0
-    
-    // MARK: - Questions data
-    struct QuizQuestion {
+    // MARK: - Private Methods Questions
+    private struct QuizQuestion {
         let image: String
         let text: String
         let correctAnswer: Bool
@@ -76,29 +89,18 @@ final class MovieQuizViewController: UIViewController {
         questions[currentQuestionIndex]
     }
     
-    // MARK: - Lifecycle
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        let currentQuestion = questions[currentQuestionIndex]
-        let viewModel = convert(model: currentQuestion)
-        show(quiz: viewModel)
-    }
-    
-    // MARK: - Questions, Answers
-    
-    struct QuizStepViewModel {
+    // MARK: - Private Methods Steps
+    private struct QuizStepViewModel {
         let image: UIImage
         let question: String
         let questionNumber: String
     }
     
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let questionStep = QuizStepViewModel( // 1
-            image: UIImage(named: model.image) ?? UIImage(), // 2
-            question: model.text, // 3
-            questionNumber: "\(currentQuestionIndex + 1)/\(questions.count)") // 4
+        let questionStep = QuizStepViewModel(
+            image: UIImage(named: model.image) ?? UIImage(),
+            question: model.text,
+            questionNumber: "\(currentQuestionIndex + 1)/\(questions.count)")
         return questionStep
     }
     
@@ -123,25 +125,21 @@ final class MovieQuizViewController: UIViewController {
         }
     }
     
-    // MARK: - Results
-    
-    struct QuizResultsViewModel {
-        // строка с заголовком алерта
+    // MARK: - Private Methods Results
+    private struct QuizResultsViewModel {
         let title: String
-        // строка с текстом о количестве набранных очков
         let text: String
-        // текст для кнопки алерта
         let buttonText: String
     }
     
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questions.count - 1 {
-            let text = "Ваш результат: \(correctAnswers)/10" // 1
-            let viewModel = QuizResultsViewModel( // 2
+            let text = "Ваш результат: \(correctAnswers)/10"
+            let viewModel = QuizResultsViewModel(
                 title: "Этот раунд окончен!",
                 text: text,
                 buttonText: "Сыграть ещё раз")
-            showResults(quiz: viewModel) // 3
+            showResults(quiz: viewModel)
         } else {
             currentQuestionIndex += 1
             let nextQuestion = questions[currentQuestionIndex]
