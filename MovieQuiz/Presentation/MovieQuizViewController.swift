@@ -106,13 +106,17 @@ final class MovieQuizViewController: UIViewController {
         return questionStep
     }
     
+    private func changeStateButton(isEnabled: Bool) {
+        noButton.isEnabled = isEnabled
+        yesButton.isEnabled = isEnabled
+    }
+
     private func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         imageView.layer.borderWidth = 0
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
-        noButton.isEnabled = true
-        yesButton.isEnabled = true
+        changeStateButton(isEnabled: true)
     }
     
     private func showAnswerResult(isCorrect: Bool) {
@@ -123,8 +127,7 @@ final class MovieQuizViewController: UIViewController {
         imageView.layer.masksToBounds = true
         imageView.layer.borderWidth = 8
         imageView.layer.borderColor = isCorrect ? UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
-        noButton.isEnabled = false
-        yesButton.isEnabled = false
+        changeStateButton(isEnabled: false)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.showNextQuestionOrResults()
