@@ -1,7 +1,7 @@
 import UIKit
 
 final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
-
+    
     // MARK: - IB Outlets
     @IBOutlet private var imageView: UIImageView!
     @IBOutlet private var textLabel: UILabel!
@@ -12,43 +12,43 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Private Properties
     private var currentQuestionIndex: Int = .zero
     private var correctAnswers: Int = .zero
-
+    
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
-
+    
     private var alertPresenter: AlertPresenterProtocol?
-
+    
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         let questionFactory = QuestionFactory()
         questionFactory.delegate = self
         self.questionFactory = questionFactory
-
+        
         let alertPresenter = AlertPresenter()
         alertPresenter.viewController = self
         self.alertPresenter = alertPresenter
-
+        
         questionFactory.requestNextQuestion()
     }
-
+    
     // MARK: - QuestionFactoryDelegate
-
+    
     func didReceiveNextQuestion(question: QuizQuestion?) {
         guard let question = question else {
             return
         }
-
+        
         currentQuestion = question
         let viewModel = convert(model: question)
-
+        
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)
         }
     }
-
+    
     // MARK: - IB Actions
     @IBAction private func noButtonClicked(_ sender: UIButton) {
         guard let currentQuestion = currentQuestion else {
@@ -81,7 +81,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         noButton.isEnabled = isEnabled
         yesButton.isEnabled = isEnabled
     }
-
+    
     private func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         imageView.layer.borderWidth = 0
@@ -109,21 +109,17 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Private Methods Results
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
-            let text = "Ваш результат: \(correctAnswers)/10"
-
             let alertModel = AlertModel(
                 title: "Этот раунд окончен",
-                message: text,
+                message: "Ваш результат: \(correctAnswers)/10",
                 buttonText: "Сыграть еще раз",
                 completion: { [weak self] in
                     guard let self = self else { return }
-
                     self.currentQuestionIndex = 0
                     self.correctAnswers = 0
-
                     self.questionFactory?.requestNextQuestion()
                 })
-
+            
             alertPresenter?.show(alertModel: alertModel)
         } else {
             currentQuestionIndex += 1
