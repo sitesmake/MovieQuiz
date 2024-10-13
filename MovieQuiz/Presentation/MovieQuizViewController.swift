@@ -115,7 +115,12 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
 
             statisticService.store(correctAnswers: correctAnswers, givenAnswers: questionsAmount)
 
-            let message = "Ваш результат:\(correctAnswers)/\(questionsAmount)\nКоличество сыгранных квизов: \(statisticService.gamesCount)\nРекорд: \(statisticService.bestGameStat())\nСредняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
+            let message = """
+                Ваш результат:\(correctAnswers)/\(questionsAmount)
+                Количество сыгранных квизов: \(statisticService.gamesCount)
+                Рекорд: \(statisticService.bestGameStat())
+                Средняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%
+            """
 
             let alertModel = AlertModel(
                 title: "Этот раунд окончен",

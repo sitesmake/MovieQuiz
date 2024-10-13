@@ -7,7 +7,7 @@
 
 import Foundation
 
-class StatisticService: StatisticServiceProtocol {
+final class StatisticService: StatisticServiceProtocol {
     private let storage: UserDefaults = .standard
     
     private enum Keys: String {
@@ -62,11 +62,11 @@ class StatisticService: StatisticServiceProtocol {
     }
     
     var totalAccuracy: Double {
-        return Double(correctAnswers) / Double(totalAnswers)
+        Double(correctAnswers) / Double(totalAnswers)
     }
     
     func bestGameStat() -> String {
-        return "\(bestGame.correct)/\(bestGame.total) (\(bestGame.date.dateTimeString))"
+        "\(bestGame.correct)/\(bestGame.total) (\(bestGame.date.dateTimeString))"
     }
     
     func store(correctAnswers: Int, givenAnswers: Int) {
