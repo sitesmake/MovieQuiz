@@ -16,8 +16,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     private let questionsAmount: Int = 10
     private var questionFactory: QuestionFactoryProtocol?
     private var currentQuestion: QuizQuestion?
-
     private var alertPresenter: AlertPresenterProtocol?
+    private var statisticService: StatisticServiceProtocol?
 
     // MARK: - View Life Cycles
     override func viewDidLoad() {
@@ -30,6 +30,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         let alertPresenter = AlertPresenter()
         alertPresenter.viewController = self
         self.alertPresenter = alertPresenter
+
+        statisticService = StatisticService()
 
         questionFactory.requestNextQuestion()
     }
@@ -109,9 +111,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     // MARK: - Private Methods Results
     private func showNextQuestionOrResults() {
         if currentQuestionIndex == questionsAmount - 1 {
+            guard let statisticService = statisticService else { return }
+
+            statisticService.store(correctAnswers: correctAnswers, givenAnswers: questionsAmount)
+
+            let message = "Ваш результат:\(correctAnswers)/\(questionsAmount)\nКоличество сыгранных квизов: \(statisticService.gamesCount)\nРекорд: \(statisticService.bestGameStat())\nСредняя точность: \(String(format: "%.2f", statisticService.totalAccuracy))%"
+
             let alertModel = AlertModel(
                 title: "Этот раунд окончен",
-                message: "Ваш результат: \(correctAnswers)/10",
+                message: message,
                 buttonText: "Сыграть еще раз",
                 completion: { [weak self] in
                     guard let self = self else { return }
