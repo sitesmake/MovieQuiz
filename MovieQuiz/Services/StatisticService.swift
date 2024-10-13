@@ -50,7 +50,7 @@ class StatisticService: StatisticServiceProtocol {
         get {
             let correct = storage.integer(forKey: Keys.bestGameCorrect.rawValue)
             let total = storage.integer(forKey: Keys.bestGameTotal.rawValue)
-            let date = storage.object(forKey: Keys.bestGameDate.rawValue)
+            let date = storage.object(forKey: Keys.bestGameDate.rawValue) ?? Date()
             
             return GameResult(correct: correct, total: total, date: date as! Date)
         }
