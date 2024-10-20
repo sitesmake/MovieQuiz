@@ -8,6 +8,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     @IBOutlet private var counterLabel: UILabel!
     @IBOutlet private var noButton: UIButton!
     @IBOutlet private var yesButton: UIButton!
+    @IBOutlet private var activityIndicator: UIActivityIndicatorView!
 
     // MARK: - Private Properties
     private var currentQuestionIndex: Int = .zero
@@ -23,8 +24,7 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let questionFactory = QuestionFactory()
-        questionFactory.delegate = self
+        let questionFactory = QuestionFactory(moviesLoader: MoviesLoader(), delegate: self)
         self.questionFactory = questionFactory
 
         let alertPresenter = AlertPresenter()
@@ -33,7 +33,8 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
 
         statisticService = StatisticService()
 
-        questionFactory.requestNextQuestion()
+        showLoadingIndicator()
+        questionFactory.loadData()
     }
 
     // MARK: - QuestionFactoryDelegate
@@ -49,6 +50,15 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         DispatchQueue.main.async { [weak self] in
             self?.show(quiz: viewModel)
         }
+    }
+
+    func didFailToLoadData(with error: Error) {
+        showNetworkError(message: error.localizedDescription) // возьмём в качестве сообщения описание ошибки
+    }
+
+    func didLoadDataFromServer() {
+        activityIndicator.isHidden = true // скрываем индикатор загрузки
+        questionFactory?.requestNextQuestion()
     }
 
     // MARK: - IB Actions
@@ -70,13 +80,49 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
         showAnswerResult(isCorrect: givenAnswer == currentQuestion.correctAnswer)
     }
 
+    // MARK: - Working with network
+
+    private func showLoadingIndicator() {
+        activityIndicator.isHidden = false // говорим, что индикатор загрузки не скрыт
+        activityIndicator.startAnimating() // включаем анимацию
+    }
+
+    private func hideLoadingIndicator() {
+        activityIndicator.isHidden = true // говорим, что индикатор загрузки не скрыт
+        activityIndicator.stopAnimating() // включаем анимацию
+    }
+
+    private func showNetworkError(message: String) {
+        hideLoadingIndicator()
+
+        let model = AlertModel(title: "Ошибка",
+                               message: message,
+                               buttonText: "Попробовать еще раз") { [weak self] in
+            guard let self = self else { return }
+
+            self.currentQuestionIndex = 0
+            self.correctAnswers = 0
+
+            self.questionFactory?.requestNextQuestion()
+        }
+
+        alertPresenter?.show(alertModel: model)
+    }
+
     // MARK: - Private Methods Steps
+    //    private func convert(model: QuizQuestion) -> QuizStepViewModel {
+    //        let questionStep = QuizStepViewModel(
+    //            image: UIImage(named: model.image) ?? UIImage(),
+    //            question: model.text,
+    //            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
+    //        return questionStep
+    //    }
+
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
-        let questionStep = QuizStepViewModel(
-            image: UIImage(named: model.image) ?? UIImage(),
+        return QuizStepViewModel(
+            image: UIImage(data: model.image) ?? UIImage(),
             question: model.text,
             questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-        return questionStep
     }
 
     private func changeStateButton(isEnabled: Bool) {
