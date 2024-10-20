@@ -110,14 +110,6 @@ final class MovieQuizViewController: UIViewController, QuestionFactoryDelegate {
     }
 
     // MARK: - Private Methods Steps
-    //    private func convert(model: QuizQuestion) -> QuizStepViewModel {
-    //        let questionStep = QuizStepViewModel(
-    //            image: UIImage(named: model.image) ?? UIImage(),
-    //            question: model.text,
-    //            questionNumber: "\(currentQuestionIndex + 1)/\(questionsAmount)")
-    //        return questionStep
-    //    }
-
     private func convert(model: QuizQuestion) -> QuizStepViewModel {
         return QuizStepViewModel(
             image: UIImage(data: model.image) ?? UIImage(),
